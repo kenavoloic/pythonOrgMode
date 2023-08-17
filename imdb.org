@@ -1,0 +1,78 @@
+#+STARTUP: content
+#+TITLE: Webscaping imdb.com
+
+* Top250, création csv
+#+begin_src python
+  from outils import cheminFichier, cheminWebscrap
+  from scraping import imdb
+
+  from bs4 import BeautifulSoup
+  import pandas as pd
+  import requests
+
+  pd.set_option('display.max_columns', None)
+
+  _ = print
+
+  url = 'https://www.imdb.com/chart/top/'
+  headers = {"User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36 Edg/103.0.1264.49"}
+
+  colonnes = ['rang','titre', 'annee', 'duree', 'minutes', 'public','note']
+
+  accueil = requests.get(url, headers=headers)
+  soupe = BeautifulSoup(accueil.text, features='lxml')
+  ul = soupe.find('ul', class_='ipc-metadata-list')
+  li = ul.find_all('li', class_="ipc-metadata-list-summary-item")
+  liste = [imdb(x) for x in li]
+  nom = 'imdbTop250.csv'
+  fichier = cheminWebscrap(nom)
+  df = pd.DataFrame(liste, columns=colonnes)
+  df.to_csv(fichier, index=False)
+#+end_src
+
+* Lecture imdbTop250.csv
+#+begin_src python
+  from outils import cheminFichier, cheminWebscrap
+
+  import matplotlib.pyplot as plt
+  import numpy as np
+  import pandas as pd
+  import seaborn as sns
+
+  pd.set_option('display.max_columns', None)
+  pd.set_option('display.max_rows', None)
+
+  _ = print
+
+  nom = 'imdbTop250.csv'
+  fichier = cheminWebscrap(nom)
+
+  df = pd.read_csv(fichier)
+  # _(df.shape)
+  # _(df.columns)
+  # _(df['note'].value_counts())
+  #_(df['minutes'].nlargest(10))
+  # _(df.iloc[197])
+  _(df.groupby(['note'])['minutes'].sum())
+    
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+note
+8.0     400
+8.1    8912
+8.2    9214
+8.3    5386
+8.4    3546
+8.5    2498
+8.6    1882
+8.7     707
+8.8    1251
+8.9     154
+9.0     846
+9.2     175
+9.3     142
+Name: minutes, dtype: int64
+#+end_example

@@ -35,16 +35,21 @@ https://news.ycombinator.com/item?id=15875577
   dossier = '/home/claude/zdata/'
   fichier = cheminFichier(nom=nom, dossier=dossier)
 
+  df['playerDetails.kickingFoot'].replace('LEFT', 'Gaucher', inplace=True)
+  df['playerDetails.kickingFoot'].replace('RIGHT', 'Droitier', inplace=True)
+
   df.to_csv(fichier, index=False)
 #+end_src
 
 * aflComAu.csv
 ** chargement fichier csv
+
 #+begin_src python :session aflcomau
   from outils import cheminFichier
   import matplotlib.pyplot as plt
   import numpy as np
   import pandas as pd
+  import seaborn as sns
 
   pd.set_option('display.max_columns', 200)
   pd.set_option('display.max_rows', 200)  
@@ -58,8 +63,6 @@ https://news.ycombinator.com/item?id=15875577
   df = pd.read_csv(fichier)
 
 #+end_src
-
-#+RESULTS:
 
 ** info sur chacune des Series
 
@@ -82,46 +85,30 @@ https://news.ycombinator.com/item?id=15875577
 
 ** Valeurs intéressantes
 #+begin_src python :session aflcomau
+  tailles = [170, 175, 180, 185, 190, 195, 200, 205, 210, 215]
+  df['playerDetails.heightCm'].plot(kind="hist", bins=tailles, edgecolor="#bf4534", color="#34bf45")
+  plt.title('Taille des joueurs en cm')
+  plt.xlabel('Taille')
+  plt.ylabel('Nombre')
+  plt.show()
 
-  #_(type(df['playerDetails.weightKg'].value_counts()))
-  df['playerDetails.weightKg'].hist(bins=10)
+  poids = [60, 70, 80, 90, 100, 110, 120]
+  df['playerDetails.weightKg'].plot(kind="hist", bins=poids, edgecolor="#bf4534", color="#34bf45")
   plt.title('Poids en kg')
   plt.xlabel('Poids')
   plt.ylabel('Nombre')
 
   plt.show()
 
-  df['playerDetails.heightCm'].hist(bins=10)
-  plt.title('Taille des joueurs en cm')
-  plt.xlabel('Taille')
-  plt.ylabel('Nombre')
-
-  plt.show()
-
-  df['playerDetails.kickingFoot'].hist(bins=3)
+  df['playerDetails.kickingFoot'].hist()
   plt.title('Pied fort')
-  plt.legend()
   plt.show()
 
-  df['totals.matchesPlayed'].hist(bins=25)
+  matches = [0, 5, 10, 15, 20, 25]
+  df['totals.matchesPlayed'].plot(kind="hist", bins=matches, edgecolor="#bf4534", color="#34bf45")
   plt.title('Matches joués')
   plt.show()
+  
 
-
-  #_(df['playerDetails.heightCm'].value_counts())
-  # _(df['playerDetails.heightCm'].mean())
-  # _(df['playerDetails.heightCm'].median())
-  # _(df['playerDetails.heightCm'].mode())    
-  #_(df['playerDetails.kickingFoot'].value_counts())
-  #_(df['playerDetails.stateOfOrigin'].value_counts())
-  #_(df['playerDetails.surname'].value_counts())
-  # _(df['totals.matchesPlayed'].value_counts())
-  #_(df['gamesPlayed'].value_counts())  
-  # _(df['totals.tackles'].value_counts())
-  # _(df['playerDetails.draftYear'].value_counts())
-  # _(df['playerDetails.debutYear'].value_counts())
-  #_(df['team.teamName'].unique())    
 #+end_src
-
 #+RESULTS:
-: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.

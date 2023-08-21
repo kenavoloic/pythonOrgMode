@@ -1,0 +1,127 @@
+#+STARTUP: showall
+#+TITLE: Statistiques AFLCOM.au jouers masculins de Australian Football
+* capture du json puis sauvegarde sous players.json
+
+https://news.ycombinator.com/item?id=15875577
+
+#+begin_src shell :cache yes :results verbatim
+  curl -o australianFootball.json 'https://api.afl.com.au/statspro/playersStats/seasons/CD_S2023014?includeBenchmarks=false' --compressed -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0' -H 'Accept: */*' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate, br' -H 'Referer: https://www.afl.com.au/' -H 'x-media-mis-token: 31f60c12c504497ddf20951b3922f73c' -H 'Origin: https://www.afl.com.au' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-site' -H 'Connection: keep-alive'
+#+end_src
+
+* lecture players.json et création de aflComAu.csv
+#+begin_src python
+
+  from outils import cheminFichier
+  import json
+  import pandas as pd
+
+  _ = print
+
+  nom = 'australianFootball.json'
+  dossier = '/home/claude/zdata/json/'
+  fichier = cheminFichier(nom=nom, dossier=dossier)
+  #data = json.load(fichier)
+  data = None
+
+  with open(fichier, 'r') as f:
+      data = json.load(f)
+
+  #joueurs = data.players
+  df = pd.json_normalize(data['players'])
+
+  _(df.shape)
+  _(df.head())
+  nom = 'aflComAu.csv'
+  dossier = '/home/claude/zdata/'
+  fichier = cheminFichier(nom=nom, dossier=dossier)
+
+  df.to_csv(fichier, index=False)
+#+end_src
+
+* aflComAu.csv
+** chargement fichier csv
+#+begin_src python :session aflcomau
+  from outils import cheminFichier
+  import matplotlib.pyplot as plt
+  import numpy as np
+  import pandas as pd
+
+  pd.set_option('display.max_columns', 200)
+  pd.set_option('display.max_rows', 200)  
+
+  _ = print
+
+  nom = 'aflComAu.csv'
+  dossier = '/home/claude/zdata/'
+  fichier = cheminFichier(nom=nom, dossier=dossier)
+
+  df = pd.read_csv(fichier)
+
+#+end_src
+
+#+RESULTS:
+
+** info sur chacune des Series
+
+#+begin_src python :session aflcomau
+  pd.set_option('display.max_columns', None)
+  pd.set_option('display.max_rows', None)  
+  _(df.describe())
+#+end_src
+
+** Équipes de la ligue
+#+begin_src python :session aflcomau
+  _(df['team.teamName'].unique())
+#+end_src
+
+#+RESULTS:
+: ['North Melbourne' 'Gold Coast Suns' 'Collingwood' 'Richmond' 'Fremantle'
+:  'Hawthorn' 'Adelaide Crows' 'Geelong Cats' 'Carlton' 'Port Adelaide'
+:  'Brisbane Lions' 'Essendon' 'GWS Giants' 'Melbourne' 'Western Bulldogs'
+:  'St Kilda' 'West Coast Eagles' 'Sydney Swans']
+
+** Valeurs intéressantes
+#+begin_src python :session aflcomau
+
+  #_(type(df['playerDetails.weightKg'].value_counts()))
+  df['playerDetails.weightKg'].hist(bins=10)
+  plt.title('Poids en kg')
+  plt.xlabel('Poids')
+  plt.ylabel('Nombre')
+
+  plt.show()
+
+  df['playerDetails.heightCm'].hist(bins=10)
+  plt.title('Taille des joueurs en cm')
+  plt.xlabel('Taille')
+  plt.ylabel('Nombre')
+
+  plt.show()
+
+  df['playerDetails.kickingFoot'].hist(bins=3)
+  plt.title('Pied fort')
+  plt.legend()
+  plt.show()
+
+  df['totals.matchesPlayed'].hist(bins=25)
+  plt.title('Matches joués')
+  plt.show()
+
+
+  #_(df['playerDetails.heightCm'].value_counts())
+  # _(df['playerDetails.heightCm'].mean())
+  # _(df['playerDetails.heightCm'].median())
+  # _(df['playerDetails.heightCm'].mode())    
+  #_(df['playerDetails.kickingFoot'].value_counts())
+  #_(df['playerDetails.stateOfOrigin'].value_counts())
+  #_(df['playerDetails.surname'].value_counts())
+  # _(df['totals.matchesPlayed'].value_counts())
+  #_(df['gamesPlayed'].value_counts())  
+  # _(df['totals.tackles'].value_counts())
+  # _(df['playerDetails.draftYear'].value_counts())
+  # _(df['playerDetails.debutYear'].value_counts())
+  #_(df['team.teamName'].unique())    
+#+end_src
+
+#+RESULTS:
+: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
